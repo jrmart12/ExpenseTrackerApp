@@ -50,9 +50,11 @@ const ManageExpense = ({ route, navigation }) => {
       setIsSubmitting(true);
       try {
         const id = await storeExpense(expenseData);
-        expensesCtx.addExpense({ ...expenseData, id: id });S
+        console.log(expenseData);
+        expensesCtx.addExpense({ ...expenseData, id: id });
         navigation.goBack();
       } catch (error) {
+        console.log(error);
         setError("couldn't add expense");
         setIsSubmitting(false);
       }
@@ -66,11 +68,11 @@ const ManageExpense = ({ route, navigation }) => {
       title: isEditing ? "Edit Expense" : "Add Expense",
     });
   }, [navigation, isEditing]);
-  if (error && !isSubmitting) {
-    return <ErrorOverlay error={error} onConfirm={errorHandler} />;
-  }
   if (isSubmitting) {
     return <LoadingOverlay />;
+  }
+  if (error && !isSubmitting) {
+    return <ErrorOverlay error={error} onConfirm={errorHandler} />;
   }
   return (
     <View style={styles.container}>

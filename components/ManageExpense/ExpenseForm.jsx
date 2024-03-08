@@ -3,12 +3,21 @@ import { useState } from "react";
 import Input from "./Input";
 import Button from "../UI/Button";
 import { GlobalStyles } from "../../constants/styles";
+import { Dropdown } from "react-native-element-dropdown";
+import DatePicker from "react-native-date-picker";
+const data = [
+  { label: "Davivienda", value: "Davivienda" },
+  { label: "Bac", value: "Bac" },
+  { label: "Atlantida", value: "Atlantida" },
+];
 const ExpenseForm = ({
   onCancel,
   onSubmit,
   selectedExpense,
   submitButtonLabel,
 }) => {
+  const [open, setOpen] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
   const [inputs, setInputs] = useState({
     amount: {
       value: selectedExpense ? selectedExpense.amount.toString() : "",
@@ -17,14 +26,19 @@ const ExpenseForm = ({
     date: {
       value: selectedExpense
         ? selectedExpense.date.toISOString().slice(0, 10)
-        : "",
+        : new Date(),
       isValid: true,
     },
     description: {
       value: selectedExpense ? selectedExpense.description : "",
       isValid: true,
     },
+    type: {
+      value: selectedExpense ? selectedExpense.type : "",
+      isValid: true,
+    },
   });
+  const [date, setDate] = useState(new Date(inputs.date.value));
   function inputChangedHandler(inputIdentifier, enteredValue) {
     setInputs((currentInputValues) => {
       return {
@@ -36,8 +50,9 @@ const ExpenseForm = ({
   function onSubmitHandler() {
     const expenseData = {
       amount: +inputs.amount.value,
-      date: new Date(inputs.date.value),
+      date: date,
       description: inputs.description.value,
+      type: inputs.type.value,
     };
 
     const amountIsValid = !isNaN(expenseData.amount) && expenseData.amount > 0;
@@ -53,13 +68,21 @@ const ExpenseForm = ({
             value: currentInputs.description.value,
             isValid: descriptionIsValid,
           },
+          type: {
+            value: currentInputs.type.value,
+            isValid: descriptionIsValid,
+          },
         };
       });
       return;
     }
     onSubmit(expenseData);
   }
-  const formIsInvalid = !inputs.amount.isValid || !inputs.date.isValid ||!inputs.description.isValid
+  const formIsInvalid =
+    !inputs.amount.isValid ||
+    !inputs.date.isValid ||
+    !inputs.description.isValid;
+
   return (
     <View style={styles.form}>
       <Text style={styles.title}>Your Expense</Text>
@@ -74,15 +97,20 @@ const ExpenseForm = ({
             value: inputs.amount.value,
           }}
         />
-        <Input
-          label="Date"
-          style={styles.input}
-          invalid={!inputs.date.isValid}
-          textInputConfig={{
-            onChangeText: inputChangedHandler.bind(this, "date"),
-            placeholder: "YYY-MM-DD",
-            maxLength: 10,
-            value: inputs.date.value,
+
+        <Button style={styles.date} onPress={() => setOpen(true)}>
+          {date ? date.toISOString().slice(0, 10) : "Open Date"}
+        </Button>
+        <DatePicker
+          modal
+          open={open}
+          date={date}
+          onConfirm={(date) => {
+            setOpen(false);
+            setDate(date);
+          }}
+          onCancel={() => {
+            setOpen(false);
           }}
         />
       </View>
@@ -95,7 +123,31 @@ const ExpenseForm = ({
           value: inputs.description.value,
         }}
       />
-      {formIsInvalid &&<Text style={styles.errorText}>Invalid input Values</Text>}
+      <Dropdown
+        style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={data}
+        search
+        maxHeight={300}
+        labelField="label"
+        valueField="value"
+        placeholder={!isFocus ? "Select BANK" : "..."}
+        searchPlaceholder="Search..."
+        value={inputs.type.value}
+        onFocus={() => setIsFocus(true)}
+        onBlur={() => setIsFocus(false)}
+        onChange={(item) => {
+          console.log(item);
+          inputChangedHandler("type", item.value);
+          setIsFocus(false);
+        }}
+      />
+      {formIsInvalid && (
+        <Text style={styles.errorText}>Invalid input Values</Text>
+      )}
       <View style={styles.buttonContainer}>
         <Button style={styles.button} mode="flat" onPress={onCancel}>
           Cancel
@@ -113,7 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   input: {
-    flex: 1,
+    flex: 2,
   },
   form: {
     marginTop: 40,
@@ -129,16 +181,57 @@ const styles = StyleSheet.create({
     minWidth: 120,
     marginHorizontal: 8,
   },
+  date: {
+    flex: 1,
+    marginHorizontal: 8,
+    marginVertical: 24,
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
-  errorText:{
+  errorText: {
     textAlign: "center",
     color: GlobalStyles.colors.error500,
-    margin:8,
-
-  }
+    margin: 8,
+  },
+  dropdown: {
+    height: 50,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 20,
+    marginTop: 20,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: "absolute",
+    backgroundColor: "white",
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+    color: "white",
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: "white",
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
 });
 export default ExpenseForm;

@@ -8,10 +8,10 @@ const ExpensesSummary = ({periodName,expenses}) => {
   }, 0);
   return (
     <View style={styles.expenses}>
-    <Text style={styles.period}>{periodName}</Text>
-    <Text style={styles.sum}>${expensesSum.toFixed(2)}</Text>
-  </View>
-  )
+      <Text style={styles.period}>{periodName}</Text>
+      <Text style={styles.sum}>L.{expensesSum.toFixed(2)}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

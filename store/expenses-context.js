@@ -4,9 +4,9 @@ import { createContext, useReducer } from 'react';
 export const ExpensesContext = createContext({
   expenses: [],
   setExpenses: (expenses) => {},
-  addExpense: ({ description, amount, date }) => {},
+  addExpense: ({ description, amount, date, type }) => {},
   deleteExpense: (id) => {},
-  updateExpense: (id, { description, amount, date }) => {},
+  updateExpense: (id, { description, amount, date, type }) => {},
 });
 
 function expensesReducer(state, action) {
